@@ -49,7 +49,8 @@ def find_avrdude():
 def detect_serial_ports():
     try:
         import serial.tools.list_ports
-        return [p.device for p in serial.tools.list_ports.comports()]
+        return [p.device for p in serial.tools.list_ports.comports()
+                if "debug" not in p.device.lower() and "bluetooth" not in p.device.lower()]
     except ImportError:
         return []
 
@@ -316,13 +317,20 @@ class App(ctk.CTk):
             self.after(0, lambda: self._on_done(False))
 
     def _hex_flash(self, port, hex_file, board):
+        cli = find_arduino_cli()
         avrdude = find_avrdude()
         conf = TOOLS_DIR / "avrdude.conf"
-        cmd = [avrdude, "-v", "-p", board["mcu"], "-c", board["prog"],
-               "-P", port, "-b", board.get("baud", "57600"),
-               "-U", f"flash:w:{hex_file}:i"]
-        if conf.exists():
-            cmd[1:1] = ["-C", str(conf)]
+
+        if cli and cli != "arduino-cli":
+            cmd = [cli, "upload", "-p", port, "--fqbn", board.get("fqbn", "arduino:avr:leonardo"),
+                   "-i", hex_file]
+        else:
+            cmd = [avrdude, "-v", "-p", board["mcu"], "-c", board["prog"],
+                   "-P", port, "-b", board.get("baud", "57600"),
+                   "-U", f"flash:w:{hex_file}:i"]
+            if conf.exists():
+                cmd[1:1] = ["-C", str(conf)]
+
         self._log(f"$ {' '.join(cmd)}")
         try:
             p = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
@@ -335,7 +343,7 @@ class App(ctk.CTk):
             self._log("✗ Timeout")
             self.after(0, lambda: self._on_done(False))
         except FileNotFoundError:
-            self._log("✗ avrdude not found — put avrdude.exe in tools/")
+            self._log("✗ arduino-cli / avrdude not found!")
             self.after(0, lambda: self._on_done(False))
 
     def _on_done(self, ok):
