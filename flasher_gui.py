@@ -199,8 +199,9 @@ class App(ctk.CTk):
             self.source_card.pack(fill="x", padx=0, pady=(0, 8))
             self.hex_card.pack_forget()
         else:
-            self.hex_card.pack(fill="x", padx=0, pady=(0, 8))
             self.source_card.pack_forget()
+            self.hex_card.pack(fill="x", padx=0, pady=(0, 8), ipady=8)
+            self.hex_card.update_idletasks()
             self._refresh_presets()
 
     def _auto_detect(self):
