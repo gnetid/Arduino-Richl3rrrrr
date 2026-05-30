@@ -196,11 +196,11 @@ class App(ctk.CTk):
 
     def on_mode_change(self, *_):
         if self.flash_mode.get() == MODE_SOURCE:
+            self.source_card.pack(fill="x", padx=0, pady=(0, 8))
             self.hex_card.pack_forget()
-            self.source_card.pack(fill="x", padx=0, pady=(0, 8), before=self.board_cb.master)
         else:
+            self.hex_card.pack(fill="x", padx=0, pady=(0, 8))
             self.source_card.pack_forget()
-            self.hex_card.pack(fill="x", padx=0, pady=(0, 8), before=self.board_cb.master)
             self._refresh_presets()
 
     def _auto_detect(self):
