@@ -121,11 +121,15 @@ class App(ctk.CTk):
         ctk.CTkLabel(self.hex_card, text="Pre-compiled Firmware (.hex / .bin)",
                      font=ctk.CTkFont(size=11, weight="bold"), text_color=TEXT).pack(anchor="w", padx=14, pady=(12, 2))
         hr = ctk.CTkFrame(self.hex_card, fg_color="transparent")
-        hr.pack(fill="x", padx=14, pady=(4, 12))
+        hr.pack(fill="x", padx=14, pady=(4, 4))
         ctk.CTkEntry(hr, textvariable=self.hex_path, fg_color=ACCENT, border_color="#2A2A3E",
                      height=34).pack(side="left", fill="x", expand=True)
         ctk.CTkButton(hr, text="Browse", width=70, height=34, fg_color=ACCENT,
                       hover_color="#2A2A3E", command=self._browse_hex).pack(side="left", padx=(8, 0))
+
+        self.presets_frame = ctk.CTkFrame(self.hex_card, fg_color="transparent")
+        self.presets_frame.pack(fill="x", padx=14, pady=(0, 10))
+        self._refresh_presets()
 
         row = ctk.CTkFrame(content, fg_color="transparent")
         row.pack(fill="x", pady=8)
@@ -200,10 +204,19 @@ class App(ctk.CTk):
 
     def _auto_detect(self):
         self._scan_ports()
+        self._refresh_presets()
+
+    def _refresh_presets(self):
+        for w in self.presets_frame.winfo_children():
+            w.destroy()
         if FIRMWARE_DIR.exists():
-            for h in FIRMWARE_DIR.glob("*.hex"):
-                self.hex_path.set(str(h))
-                break
+            presets = sorted(FIRMWARE_DIR.glob("*"))
+            if presets:
+                for p in presets:
+                    ctk.CTkButton(self.presets_frame, text=p.name, width=160,
+                                  fg_color=ACCENT, hover_color="#2A2A3E",
+                                  command=lambda px=p: self.hex_path.set(str(px))
+                                  ).pack(side="left", padx=2)
 
     def _scan_ports(self):
         ports = detect_serial_ports()
