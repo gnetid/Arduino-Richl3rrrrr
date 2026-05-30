@@ -201,6 +201,7 @@ class App(ctk.CTk):
         else:
             self.source_card.pack_forget()
             self.hex_card.pack(fill="x", padx=0, pady=(0, 8), before=self.board_cb.master)
+            self._refresh_presets()
 
     def _auto_detect(self):
         self._scan_ports()
@@ -214,7 +215,8 @@ class App(ctk.CTk):
             if presets:
                 for p in presets:
                     ctk.CTkButton(self.presets_frame, text=p.name, width=160,
-                                  fg_color=ACCENT, hover_color="#2A2A3E",
+                                  fg_color="#1A1A2E", hover_color="#2A2A3E",
+                                  border_color=NEON, border_width=1, text_color=NEON,
                                   command=lambda px=p: self.hex_path.set(str(px))
                                   ).pack(side="left", padx=2)
 
